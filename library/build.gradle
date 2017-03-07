@@ -1,4 +1,8 @@
 apply plugin: 'com.android.library'
+apply plugin: 'maven'
+apply plugin: 'maven-publish'
+group = project.GROUP
+version = project.VERSION_NAME
 
 android {
     compileSdkVersion Integer.parseInt(project.ANDROID_BUILD_SDK_VERSION)
@@ -22,15 +26,40 @@ android {
     }
 }
 
-task jar(type: Jar) {
-    dependsOn assembleRelease
-    baseName project.POM_ARTIFACT_ID
-    version project.VERSION_NAME
-    from fileTree(dir: 'build/intermediates/classes/release/')
-}
-
 dependencies {
-    compile 'com.android.support:support-annotations:23.1.1'
+    compile 'com.android.support:support-annotations:25.2.0'
 }
 
-apply from: 'https://raw.github.com/chrisbanes/gradle-mvn-push/master/gradle-mvn-push.gradle'
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            pom.artifactId = 'tokenautocomplete'
+            repository url: 'file://' + new File(System.getProperty('user.home'), '.m2/repository').absolutePath
+            repository url: "http://" + mavenRepo + "-${project.version.endsWith('-SNAPSHOT') ? 'snapshots' : 'releases' }"
+        }
+    }
+}
+task install(dependsOn: uploadArchives)
+
+// build a jar with source files
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+
+task javadoc(type: Javadoc) {
+    failOnError false
+    source = android.sourceSets.main.java.sourceFiles
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+}
+
+// build a jar with javadoc
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.getDestinationDir()
+}
+
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+}
