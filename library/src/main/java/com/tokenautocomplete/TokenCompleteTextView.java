@@ -691,7 +691,7 @@ public abstract class TokenCompleteTextView<T> extends MultiAutoCompleteTextView
             handled = super.onTouchEvent(event);
         }
 
-        if (isFocused() && text != null && lastLayout != null && action == MotionEvent.ACTION_UP) {
+        if (text != null && lastLayout != null && action == MotionEvent.ACTION_UP) {
 
             int offset = getOffsetForPosition(event.getX(), event.getY());
 
