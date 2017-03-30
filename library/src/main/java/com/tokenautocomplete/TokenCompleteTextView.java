@@ -3,7 +3,6 @@ package com.tokenautocomplete;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.ColorStateList;
-import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.os.Build;
@@ -45,6 +44,7 @@ import android.widget.TextView;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -1152,6 +1152,16 @@ public abstract class TokenCompleteTextView<T> extends MultiAutoCompleteTextView
                     // Make sure the callback gets called
                     spanWatcher.onSpanRemoved(text, span, text.getSpanStart(span), text.getSpanEnd(span));
                 }
+
+                for (Iterator<TokenImageSpan> iter = hiddenSpans.listIterator(); iter.hasNext(); ) {
+                    TokenImageSpan span = iter.next();
+                    iter.remove();
+
+                    // Remove it from the state and fire the callback
+                    spanWatcher.onSpanRemoved(text, span, 0, 0);
+                }
+
+                updateCountSpan();
             }
         });
     }
